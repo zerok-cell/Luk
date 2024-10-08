@@ -3,7 +3,7 @@ import asyncio
 import torch
 from sounddevice import play, stop
 from time import sleep
-
+from queue import Queue
 
 from fuzzywuzzy import process
 
@@ -31,6 +31,7 @@ class TextToSpeach:
         _device = torch.device("cpu")
         torch.set_num_threads(8)
         self.tts_model.to(_device)
+        voice = Queue(3)
         print("312312")
         while True:
             if self.data.qsize() != 0:
@@ -41,8 +42,11 @@ class TextToSpeach:
                 audio = self.tts_model.apply_tts(
                     text=_message, speaker=self.speaker, sample_rate=_sample_rate
                 )
-                play(audio, _sample_rate)
-                sleep(len(audio) / _sample_rate + 2)
+                voice.put(audio)
+                voice_extract = voice.get()
+                print(voice_extract)
+                play(voice_extract, _sample_rate)
+                sleep(len(voice_extract) / _sample_rate + 2)
                 stop()
 
 
