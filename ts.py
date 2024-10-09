@@ -1,9 +1,17 @@
-from colorama import Fore, Style, Back
+import pika
+import queue
 
+pik = pika.BlockingConnection(pika.ConnectionParameters(host="localhost"))
+channel = pik.channel()
 
-def x():
-    d = "Начинаем распознавание..."
-    print(Fore.GREEN + Style.BRIGHT + d, flush=True)
+class n():
+    pass
 
+channel.queue_declare(queue='hello')
+x = queue.Queue(2)
+x.put('2')
+channel.basic_publish(exchange='', routing_key='hello', body=)
 
-x()
+print('send')
+
+pik.close()

@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Запуск текущего файла",
+            "type": "debugpy",  // Используйте "debugpy" вместо "python"
+            "request": "launch",
+            "program": "C:\\Works\\Luk\\interface.py",  // Запускает текущий открытый файл
+            "console": "integratedTerminal",
+
+            "justMyCode": true  // Устанавливает, чтобы отладчик не заходил в сторонний код
+        }
+    ]
+}
