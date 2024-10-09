@@ -5,9 +5,11 @@ from colorama import Fore
 from chainTextSpeach.SpeachText import SpeachText
 import threading
 import logging
+from json import load
+
 
 class Interfaces(object):
-    def __init__(self, txt_mode: bool) -> None:
+    def __init__(self, txt_mode: bool, config: dict) -> None:
         self.spchText = SpeachToText()
         self.ai = Ai()
         self.text_mode = None or txt_mode
@@ -16,13 +18,16 @@ class Interfaces(object):
         while True:
             if self.text_mode:
                 text = input(Fore.CYAN + ">>> ")
-                self.ai.question(text)
+                self.ai.question(text,config)
             else:
                 voice = self.spchText.speachtotext()
-                self.ai.question(voice)
+                self.ai.question(voice,config)
 
 
 if __name__ == "__main__":
+    
+    with open("./config.json", "r",encoding='utf-8')as file:
+        config = load(file)
     logging.basicConfig(level=logging.WARNING, filename="py_log.log",filemode="w")
     print(1)
     spch = SpeachText()
@@ -37,7 +42,7 @@ if __name__ == "__main__":
     print(1)
     speach.start()
     print(1)
-    i = Interfaces(True)
+    i = Interfaces(True,config=config)
 
     i.start()
 

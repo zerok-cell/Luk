@@ -7,7 +7,7 @@ from ollama import chat
 import threading
 from pathlib import Path
 import pika
-
+import google.generativeai as genai
 
 class Ai:
     def __init__(self) -> None:
@@ -47,22 +47,29 @@ class Ai:
         cls.channel.queue_declare(queue='message')
         return connection, cls.channel
     
-    def question(self, text):
-        conn, channel = self.queemq_create()
-        # self.expectation()
-        data_in_pamat_user = {"role": "user", "content": text}
-        self.pamat.append(data_in_pamat_user)
-        stream = chat(
-            model=self.model,  # Это должно быть строковым идентификатором модели, а не объектом модели
-            messages=self.pamat,
-            stream=True,
-        )
+    def question(self, text,config:dict):
+        if config["MODE"] == 'Gemini'
+            conn, channel = self.queemq_create()
+            # self.expectation()
+            data_in_pamat_user = {"role": "user", "content": text}
+            self.pamat.append(data_in_pamat_user)
+
+            genai.configure(api_key="AIzaSyBvnJ31EP9rY7UTWJbJhUJrBr3MMDPC1P8")
+            model = genai.GenerativeModel(model_name="gemini-1.5-flash")
+            stream = response = model.generate_content(text)
+            
+        else:
+            stream = chat(
+                model=self.model,  # Это должно быть строковым идентификатором модели, а не объектом модели
+                messages=self.pamat,
+                stream=True,
+            )
         chunk_dot: list[str] = []
         for_pamat: list[str] = []
         red_symbol = ("?", "", ".")
-        for _word in stream:
-            chunk_dot.append(_word["message"]["content"])
-            print(_word["message"]["content"])
+        for _word in x.text:
+            chunk_dot.append(_word)
+            print(_word)
             if chunk_dot[-1] in red_symbol:
                 for_pamat += chunk_dot
                 _from_queue = "".join(chunk_dot)
