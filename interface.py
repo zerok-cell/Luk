@@ -11,32 +11,30 @@ from json import load
 class Interfaces(object):
     def __init__(self, txt_mode: bool, config: dict) -> None:
         self.spchText = SpeachToText()
-        self.ai = Ai()
+        self.ai = Ai(config)
         self.text_mode = None or txt_mode
 
     def start(self):
         while True:
             if self.text_mode:
                 text = input(Fore.CYAN + ">>> ")
-                self.ai.question(text,config)
+                self.ai.question(text,)
             else:
                 voice = self.spchText.speachtotext()
-                self.ai.question(voice,config)
+                self.ai.question(voice,)
 
 
 if __name__ == "__main__":
     
     with open("./config.json", "r",encoding='utf-8')as file:
         config = load(file)
-    logging.basicConfig(level=logging.WARNING, filename="py_log.log",filemode="w")
     print(1)
     spch = SpeachText()
     print(1)
     # playertheard = threading.Thread(target=player)
     print(1)
     speach = threading.Thread(target=spch.queemq_create)
-    speach2 = threading.Thread(target=spch.queemq_create)
-    speach3 = threading.Thread(target=spch.queemq_create)
+
     print(1)
     # playertheard.start()
     print(1)

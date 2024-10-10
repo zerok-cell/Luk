@@ -1,5 +1,7 @@
 {
     "MODE": "Gemini",
-    "GEMINI_API_KEY": "",
-    "TEXT_OR_VOICE":""
+    "GEMINI_API_KEY": "AIzaSyBvnJ31EP9rY7UTWJbJhUJrBr3MMDPC1P8",
+    "TEXT_OR_VOICE":"",
+    "AI_OR_SINTES": "SI",
+    "OUTPUT_TOKEN":300
 }

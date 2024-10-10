@@ -10,8 +10,9 @@ import pika
 import google.generativeai as genai
 
 class Ai:
-    def __init__(self) -> None:
+    def __init__(self,config) -> None:
         super().__init__()
+        self.config:dict = config
         self.model = (
             "example"  # Убедитесь, что это строка или другой сериализуемый объект
         )
@@ -29,6 +30,16 @@ class Ai:
             },
             
         ]
+        self.genconf =  {
+  "temperature": 1,
+  "top_p": 0.95,
+  "top_k": 64,
+  "max_output_tokens":self.config["OUTPUT_TOKEN"] ,
+  "response_mime_type": "text/plain",
+}
+        self.geminiContext = [{
+            
+        }]
         self.all_path = [file for file in Path("./timeslep/").glob("*")]
 
     def expectation(self):
@@ -40,6 +51,7 @@ class Ai:
 
     @classmethod
     def queemq_create(cls):
+        
         print('ai')
         _host = 'localhost'
         connection = pika.BlockingConnection(pika.ConnectionParameters(_host))
@@ -47,16 +59,17 @@ class Ai:
         cls.channel.queue_declare(queue='message')
         return connection, cls.channel
     
-    def question(self, text,config:dict):
-        if config["MODE"] == 'Gemini'
+    def question(self, text):
+        if self.config["MODE"] == 'Gemini':
             conn, channel = self.queemq_create()
             # self.expectation()
             data_in_pamat_user = {"role": "user", "content": text}
             self.pamat.append(data_in_pamat_user)
 
-            genai.configure(api_key="")
-            model = genai.GenerativeModel(model_name="gemini-1.5-flash")
-            stream = response = model.generate_content(text)
+            genai.configure(api_key=self.config['GEMINI_API_KEY'])
+            model = genai.GenerativeModel(model_name="gemini-1.5-flash", generation_config=self.genconf)
+            
+            stream = model.generate_content(text)
             
         else:
             stream = chat(
@@ -67,7 +80,7 @@ class Ai:
         chunk_dot: list[str] = []
         for_pamat: list[str] = []
         red_symbol = ("?", "", ".")
-        for _word in x.text:
+        for _word in stream.text:
             chunk_dot.append(_word)
             print(_word)
             if chunk_dot[-1] in red_symbol:
