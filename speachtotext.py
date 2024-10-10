@@ -1,7 +1,8 @@
+from json import loads
+
+from colorama import Fore, Style
 from pyaudio import PyAudio, paInt16
 from vosk import KaldiRecognizer, Model
-from json import loads
-from colorama import Fore, Style
 
 
 class SpeachToText:
@@ -37,8 +38,8 @@ class SpeachToText:
                 if (text != "" and " ") and (len(text) > 2):
                     # exitstLuk = self.checksumm(text.split())
                     # if exitstLuk:
-                        return text
-                    
+                    return text
+
             else:
                 partial_result = recognizer.PartialResult()
                 partial_text = loads(partial_result)["partial"]

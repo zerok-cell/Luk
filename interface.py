@@ -1,47 +1,47 @@
-from Ai import Ai
-from speachtotext import SpeachToText
+import threading
+from functools import lru_cache
+
+import yaml
 from colorama import Fore
+
+from Ai import Ai
 # from chainTextSpeach.Player import player
 from chainTextSpeach.SpeachText import SpeachText
-import threading
-import logging
-from json import load
+from speachtotext import SpeachToText
 
 
 class Interfaces(object):
-    def __init__(self, txt_mode: bool, config: dict) -> None:
+    def __init__(self) -> None:
         self.spchText = SpeachToText()
-        self.ai = Ai(config)
-        self.text_mode = None or txt_mode
+        self.ai = Ai()
+
+        self.conf = self.getconfig()
 
     def start(self):
+        print(self.conf)
         while True:
-            if self.text_mode:
+            if self.conf['Modes']['TEXT_OR_VOICE'] == 'TEXT':
                 text = input(Fore.CYAN + ">>> ")
-                self.ai.question(text,)
-            else:
+                self.ai.question(text, )
+            elif self.conf['Modes']['TEXT_OR_VOICE'] == 'VOICE':
                 voice = self.spchText.speachtotext()
-                self.ai.question(voice,)
+                self.ai.question(voice, )
+            else: 
+                raise ValueError("Unexpected value, see config.yaml - ['Modes']['TEXT_OR_VOICE']")
+
+    @lru_cache
+    def getconfig(self):
+        with open("config.yaml", "r", encoding='utf-8') as file:
+            config = yaml.safe_load(file)
+            return config
 
 
 if __name__ == "__main__":
-    
-    with open("./config.json", "r",encoding='utf-8')as file:
-        config = load(file)
-    print(1)
     spch = SpeachText()
-    print(1)
     # playertheard = threading.Thread(target=player)
-    print(1)
     speach = threading.Thread(target=spch.queemq_create)
-
-    print(1)
     # playertheard.start()
-    print(1)
     speach.start()
-    print(1)
-    i = Interfaces(True,config=config)
+    i = Interfaces()
 
     i.start()
-
-

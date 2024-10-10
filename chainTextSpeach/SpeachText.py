@@ -1,19 +1,15 @@
 import io
+from json import load
 
+import pika
+import pyttsx3
 import sounddevice
 import torch
 from torch.package import PackageImporter
-from torch import TensorType
 
-from time import sleep
-from queue import Queue
-import pika
-from soundfile import read
-import pyttsx3
-from json import load
 
 class SpeachText(object):
-    def __init__(self,):
+    def __init__(self, ):
         self.channel = None
         self._sample_rate = 24000
         self.local_file = "./voiceModel/v4_ru.pt"
@@ -30,24 +26,23 @@ class SpeachText(object):
 
     def queemq_create(self):
         while True:
-            with open("./config.json", "r",encoding='utf-8')as file:
-                config = load(file)
             conn = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
             channel = conn.channel()
             channel.queue_declare(queue='message')
 
             channel.basic_consume(queue='message',
                                   auto_ack=True,
-                                  on_message_callback=lambda ch, method, properties, body: self.spch(ch, method, properties, body, config),arguments={"config":config})
+                                  on_message_callback=self.spch,
+                                  )
             print('111')
             channel.start_consuming()
 
-    def spch(self,ch, method, properties, body: bytes,config:dict):
+    def spch(self, ch, method, properties, body: bytes, config: dict):
         print("[X]", body.decode('utf-8'))
         if body.strip():
+            # TODO config from voice
             if config["AI_OR_SINTES"] == 'AI':
 
-            
                 print(11111, body)
                 exit() if isinstance(body, str) else None
 
@@ -69,4 +64,4 @@ class SpeachText(object):
             else:
                 engine = pyttsx3.init()
                 engine.say(body.decode('utf-8'))
-                engine.runAndWait() 
+                engine.runAndWait()

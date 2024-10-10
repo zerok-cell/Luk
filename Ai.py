@@ -1,25 +1,25 @@
+from pathlib import Path
 from queue import Queue
 from random import choice
-from sounddevice import play, stop
-from time import sleep
-from soundfile import read
-from ollama import chat
-import threading
-from pathlib import Path
-import pika
+
 import google.generativeai as genai
+import pika
+from sounddevice import play
+from soundfile import read
+
+from ollama import chat
+
 
 class Ai:
-    def __init__(self,config) -> None:
+    def __init__(self) -> None:
         super().__init__()
-        self.config:dict = config
         self.model = (
             "example"  # Убедитесь, что это строка или другой сериализуемый объект
         )
         self.data = Queue(maxsize=200)
         self.name_bot = "Люк"
         self.pamat = [
-            {
+            {c
                 "role": "user",
                 "content": f"Ты асистент на моем компьбтере и тебя зовут {self.name_bot}.{self.name_bot}у строго "
                            f"запрещено использовать Английские слова так как ты из за них умрешь",
@@ -28,17 +28,17 @@ class Ai:
                 "role": self.name_bot,
                 "content": "Хорошо теперь я асистент на твоем компьтере и буду подчинятся тебе ",
             },
-            
+
         ]
-        self.genconf =  {
-  "temperature": 1,
-  "top_p": 0.95,
-  "top_k": 64,
-  "max_output_tokens":self.config["OUTPUT_TOKEN"] ,
-  "response_mime_type": "text/plain",
-}
+        self.genconf = {
+            "temperature": 1,
+            "top_p": 0.95,
+            "top_k": 64,
+            "max_output_tokens": 1,  # TODO: configs token
+            "response_mime_type": "text/plain",
+        }
         self.geminiContext = [{
-            
+
         }]
         self.all_path = [file for file in Path("./timeslep/").glob("*")]
 
@@ -51,15 +51,16 @@ class Ai:
 
     @classmethod
     def queemq_create(cls):
-        
+
         print('ai')
         _host = 'localhost'
         connection = pika.BlockingConnection(pika.ConnectionParameters(_host))
         cls.channel = connection.channel()
         cls.channel.queue_declare(queue='message')
         return connection, cls.channel
-    
+
     def question(self, text):
+        # TODO here config
         if self.config["MODE"] == 'Gemini':
             conn, channel = self.queemq_create()
             # self.expectation()
@@ -68,9 +69,9 @@ class Ai:
 
             genai.configure(api_key=self.config['GEMINI_API_KEY'])
             model = genai.GenerativeModel(model_name="gemini-1.5-flash", generation_config=self.genconf)
-            
+
             stream = model.generate_content(text)
-            
+
         else:
             stream = chat(
                 model=self.model,  # Это должно быть строковым идентификатором модели, а не объектом модели
@@ -89,7 +90,6 @@ class Ai:
                 channel.basic_publish(exchange='', routing_key='message', body=_from_queue)
                 chunk_dot.clear()
         conn.close()
-
 
         res_text = "".join(for_pamat)
         print(res_text)
