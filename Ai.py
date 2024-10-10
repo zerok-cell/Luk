@@ -54,7 +54,7 @@ class Ai:
             data_in_pamat_user = {"role": "user", "content": text}
             self.pamat.append(data_in_pamat_user)
 
-            genai.configure(api_key="AIzaSyBvnJ31EP9rY7UTWJbJhUJrBr3MMDPC1P8")
+            genai.configure(api_key="")
             model = genai.GenerativeModel(model_name="gemini-1.5-flash")
             stream = response = model.generate_content(text)
             
