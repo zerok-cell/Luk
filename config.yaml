@@ -1,6 +1,6 @@
 GEMINI:
   MODE: Gemini
-  GEMINI_API_KEY: "AIzaSyBvnJ31EP9rY7UTWJbJhUJrBr3MMDPC1P8"
+  GEMINI_API_KEY: ""
   OUTPUT_TOKEN: 50
   TOP_P: 1
   TOP_K: 0.95
@@ -12,5 +12,5 @@ Modes:
   TEXT_OR_VOICE: "TEXT"
   AI_OR_SINTES: "YA"
 Yandex:
-  KEY: "AQVN2VrgffxhOgAxMpgCDbFBBjL04isbLxFtNFHk"
+  KEY: ""
 
