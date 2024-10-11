@@ -8,7 +8,9 @@ from sounddevice import play
 from soundfile import read
 from tools import getconfig
 from ollama import chat
-
+from google.api_core.exceptions import ResourceExhausted
+from time import sleep
+from colorama import  Fore
 
 class Ai:
     def __init__(self) -> None:
@@ -40,18 +42,18 @@ class Ai:
         }
 
         self.geminiContext = [
-        {
-      "role": "user",
-      "parts": [
-        f"{self.config['GEMINI']['PROMT']}",
-      ],
-    },
-    {
-      "role": "model",
-      "parts": [
-        "Хорошо я буду им \n",
-      ],
-    },
+            {
+                "role": "user",
+                "parts": [
+                    f"{self.config['GEMINI']['PROMT'] if self.config['GEMINI']['PROMT'] != '' else 'Будь собой'}",
+                ],
+            },
+            {
+                "role": "model",
+                "parts": [
+                    "Хорошо я буду им \n",
+                ],
+            },
         ]
         self.all_path = [file for file in Path("./timeslep/").glob("*")]
 
@@ -64,7 +66,6 @@ class Ai:
 
     @classmethod
     def queemq_create(cls):
-
         print('ai')
         _host = 'localhost'
         connection = pika.BlockingConnection(pika.ConnectionParameters(_host))
@@ -77,8 +78,8 @@ class Ai:
         # TODO here config
         if self.config["GEMINI"]["MODE"] == 'Gemini':
             _memory_user = {
-                "role":"user",
-                "parts":[
+                "role": "user",
+                "parts": [
                     text
                 ]
             }
@@ -88,34 +89,44 @@ class Ai:
             self.pamat.append(data_in_pamat_user)
             genai.configure(api_key=self.config["GEMINI"]['GEMINI_API_KEY'])
             model = genai.GenerativeModel(
-            model_name="gemini-1.5-pro-002",
-                                        )
-            chat_session = model.start_chat(
-            history=self.geminiContext )
+                model_name="gemini-1.5-flash",
+            )
 
-            response = chat_session.send_message(text)   
-            print(response.text)
-            _memory_model = {
-                "role":"model",
-                "parts":[
-                    response.text
-                ]
-            }
-            self.geminiContext.append(_memory_user)
-            self.geminiContext.append(_memory_model)
-            print(self.geminiContext)
+            chat_session = model.start_chat(
+                history=self.geminiContext)
+            try:
+                response = chat_session.send_message(text)
+                _memory_model = {
+                    "role": "model",
+                    "parts": [
+                        response.text
+                    ]
+                }
+                print(response.text)
+                self.geminiContext.append(_memory_user)
+                self.geminiContext.append(_memory_model)
+                channel.basic_publish(exchange='', routing_key='message', body=response.text)
+
+            except ResourceExhausted as e:
+                print("The quota per minute is exhausted, switch to the paid API tariff or wait 1 minute for the quota "
+                      "to become 15 requests again")
+                print(Fore.RED + "Request send after 1 minute")
+                sleep(60)
+                self.question(text=text)
+            finally:
+                return True
 
         else:
-            # stream = chat(
-            #     model=self.model,  # Это должно быть строковым идентификатором модели, а не объектом модели
-            #     messages=self.pamat,
-            #     stream=True,
-            # )
-            stream = ['d','d']
+            # Локальная модель пользователя
+            local = chat(
+                model=self.model,
+                messages=self.pamat,
+                stream=True,
+            )
             chunk_dot: list[str] = []
             for_pamat: list[str] = []
             red_symbol = ("?", "", ".")
-            for _word in stream:
+            for _word in local:
                 chunk_dot.append(_word)
                 print(_word)
                 if chunk_dot[-1] in red_symbol:
@@ -125,8 +136,8 @@ class Ai:
                     chunk_dot.clear()
         conn.close()
 
-            # res_text = "".join(for_pamat)
-            # print(res_text)
-            # luk_pamat = {"role": "Люк", "content": res_text}
-            # self.pamat.append(luk_pamat)
-            # print(self.pamat)
+        # res_text = "".join(for_pamat)
+        # print(res_text)
+        # luk_pamat = {"role": "Люк", "content": res_text}
+        # self.pamat.append(luk_pamat)
+        # print(self.pamat)
