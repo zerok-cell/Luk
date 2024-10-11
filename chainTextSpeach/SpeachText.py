@@ -6,7 +6,7 @@ import pyttsx3
 import sounddevice
 import torch
 from torch.package import PackageImporter
-
+from tools import getconfig
 
 class SpeachText(object):
     def __init__(self, ):
@@ -17,7 +17,7 @@ class SpeachText(object):
             "tts_models", "model"
         )
         self.speaker = "kseniya"
-
+        self.config = getconfig()['Modes']
     def __str__(self) -> str:
         return """Class from speach text.
     Arguments:

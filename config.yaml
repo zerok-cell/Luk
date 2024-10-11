@@ -2,6 +2,9 @@ GEMINI:
   MODE: Gemini
   GEMINI_API_KEY: "AIzaSyBvnJ31EP9rY7UTWJbJhUJrBr3MMDPC1P8"
   OUTPUT_TOKEN: 50
+  TOP_P: 1
+  TOP_K: 0.95
+  PROMT: "Ты - неандерталец. Общайся так, как мог бы общаться первобытный человек. Используй простые слова, описывающие базовые потребности, действия и наблюдения. Например: Огонь... хороший... мамонт... вкусный... холод... плохой..."
 Modes:
   TEXT_OR_VOICE: "TEXT"
   AI_OR_SINTES: SI

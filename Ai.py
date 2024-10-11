@@ -6,20 +6,21 @@ import google.generativeai as genai
 import pika
 from sounddevice import play
 from soundfile import read
-
+from tools import getconfig
 from ollama import chat
 
 
 class Ai:
     def __init__(self) -> None:
         super().__init__()
+        self.config = getconfig()
         self.model = (
             "example"  # Убедитесь, что это строка или другой сериализуемый объект
         )
         self.data = Queue(maxsize=200)
         self.name_bot = "Люк"
         self.pamat = [
-            {c
+            {
                 "role": "user",
                 "content": f"Ты асистент на моем компьбтере и тебя зовут {self.name_bot}.{self.name_bot}у строго "
                            f"запрещено использовать Английские слова так как ты из за них умрешь",
@@ -32,14 +33,26 @@ class Ai:
         ]
         self.genconf = {
             "temperature": 1,
-            "top_p": 0.95,
-            "top_k": 64,
-            "max_output_tokens": 1,  # TODO: configs token
+            "top_p": self.config["GEMINI"]["TOP_P"],
+            "top_k": int(self.config["GEMINI"]["TOP_K"]),
+            "max_output_tokens": self.config["GEMINI"]["OUTPUT_TOKEN"],  # TODO: configs token
             "response_mime_type": "text/plain",
         }
-        self.geminiContext = [{
 
-        }]
+        self.geminiContext = [
+        {
+      "role": "user",
+      "parts": [
+        f"{self.config['GEMINI']['PROMT']}",
+      ],
+    },
+    {
+      "role": "model",
+      "parts": [
+        "Хорошо я буду им \n",
+      ],
+    },
+        ]
         self.all_path = [file for file in Path("./timeslep/").glob("*")]
 
     def expectation(self):
@@ -60,39 +73,60 @@ class Ai:
         return connection, cls.channel
 
     def question(self, text):
+        conn, channel = self.queemq_create()
         # TODO here config
-        if self.config["MODE"] == 'Gemini':
-            conn, channel = self.queemq_create()
+        if self.config["GEMINI"]["MODE"] == 'Gemini':
+            _memory_user = {
+                "role":"user",
+                "parts":[
+                    text
+                ]
+            }
+            print(text)
             # self.expectation()
             data_in_pamat_user = {"role": "user", "content": text}
             self.pamat.append(data_in_pamat_user)
+            genai.configure(api_key=self.config["GEMINI"]['GEMINI_API_KEY'])
+            model = genai.GenerativeModel(
+            model_name="gemini-1.5-pro-002",
+                                        )
+            chat_session = model.start_chat(
+            history=self.geminiContext )
 
-            genai.configure(api_key=self.config['GEMINI_API_KEY'])
-            model = genai.GenerativeModel(model_name="gemini-1.5-flash", generation_config=self.genconf)
-
-            stream = model.generate_content(text)
+            response = chat_session.send_message(text)   
+            print(response.text)
+            _memory_model = {
+                "role":"model",
+                "parts":[
+                    response.text
+                ]
+            }
+            self.geminiContext.append(_memory_user)
+            self.geminiContext.append(_memory_model)
+            print(self.geminiContext)
 
         else:
-            stream = chat(
-                model=self.model,  # Это должно быть строковым идентификатором модели, а не объектом модели
-                messages=self.pamat,
-                stream=True,
-            )
-        chunk_dot: list[str] = []
-        for_pamat: list[str] = []
-        red_symbol = ("?", "", ".")
-        for _word in stream.text:
-            chunk_dot.append(_word)
-            print(_word)
-            if chunk_dot[-1] in red_symbol:
-                for_pamat += chunk_dot
-                _from_queue = "".join(chunk_dot)
-                channel.basic_publish(exchange='', routing_key='message', body=_from_queue)
-                chunk_dot.clear()
+            # stream = chat(
+            #     model=self.model,  # Это должно быть строковым идентификатором модели, а не объектом модели
+            #     messages=self.pamat,
+            #     stream=True,
+            # )
+            stream = ['d','d']
+            chunk_dot: list[str] = []
+            for_pamat: list[str] = []
+            red_symbol = ("?", "", ".")
+            for _word in stream:
+                chunk_dot.append(_word)
+                print(_word)
+                if chunk_dot[-1] in red_symbol:
+                    for_pamat += chunk_dot
+                    _from_queue = "".join(chunk_dot)
+                    channel.basic_publish(exchange='', routing_key='message', body=_from_queue)
+                    chunk_dot.clear()
         conn.close()
 
-        res_text = "".join(for_pamat)
-        print(res_text)
-        luk_pamat = {"role": "Люк", "content": res_text}
-        self.pamat.append(luk_pamat)
-        print(self.pamat)
+            # res_text = "".join(for_pamat)
+            # print(res_text)
+            # luk_pamat = {"role": "Люк", "content": res_text}
+            # self.pamat.append(luk_pamat)
+            # print(self.pamat)
