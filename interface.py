@@ -1,14 +1,16 @@
-import threading
+from threading import Thread
 
 from colorama import Fore
 from allai.Ai import Ai
 from chainTextSpeach.Player import Player
 # from chainTextSpeach.Player import player
 from chainTextSpeach.SpeachText import SpeachText
-from chainTextSpeach.SpeachText import SpeachText
-from tools import getconfig
-import logging
 
+from tools import getconfig
+from logging import basicConfig, DEBUG, debug
+from time import time
+
+s = time()
 class Interfaces(object):
     def __init__(self) -> None:
         self.voice = None
@@ -44,14 +46,17 @@ if __name__ == "__main__":
     player = Player()
     conf = getconfig()
     for _ in range(0, conf["Theard"]["FromSpeach"]):
-        threading.Thread(target=spch.queemq_create).start()
-    if conf["Modes"]["AI_OR_SINTES"] != 'YA':
-        playertheard = threading.Thread(target=player.queue_consuming).start()
+        Thread(target=spch.queemq_create).start()
+    # if conf["Modes"]["AI_OR_SINTES"] != 'YA':
+    #     playertheard = Thread(target=player.queue_consuming).start()
 
     i = Interfaces()
-    logging.basicConfig(
+    basicConfig(
     filename='app.log',
-    level=logging.DEBUG,
+    level=DEBUG,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
+
+    debug(f'Запущено за:"{time()-s}"')
+
     i.start()
