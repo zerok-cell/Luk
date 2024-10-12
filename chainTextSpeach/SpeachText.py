@@ -5,15 +5,19 @@ import pika
 import pyttsx3
 import sounddevice
 import torch
+from pydub.playback import play
 
 from speechkit import model_repository, configure_credentials, creds
 from torch.package import PackageImporter
 
 from tools import getconfig
+from pyaudio import PyAudio, paInt16
+from speachtotext import SpeachToText
 
 
-class SpeachText(object):
+class SpeachText(SpeachToText):
     def __init__(self, ):
+        super().__init__()
         self.channel = None
         self._sample_rate = 24000
         self.local_file = "./voiceModel/v4_ru.pt"
@@ -53,12 +57,12 @@ class SpeachText(object):
         self.channel = connection.channel()
         self.channel.queue_declare(queue='voice')
         self.channel.basic_publish(exchange='', routing_key='voice', body=sendobj)
-        self.queemq_create()
         connection.close()
 
     def spch(self, ch, method, properties, body: bytes):
         print("[X]", body.decode('utf-8'))
         if body.strip():
+
             # TODO config from voice
             if self.config['Modes']["AI_OR_SINTES"] == 'AI':
 
@@ -83,10 +87,22 @@ class SpeachText(object):
                 engine.runAndWait()
 
             elif self.config['Modes']["AI_OR_SINTES"] == 'YA':
+                mic = PyAudio()
+                stream = mic.open(
+                    format=paInt16,
+                    channels=1,
+                    rate=16000,
+                    input=True,
+                    frames_per_buffer=2048,
+                )
+                stream.stop_stream()
+                print('dawda')
                 model = model_repository.synthesis_model()
                 model.voice = 'anton'
                 model.role = 'good'
+                result = model.synthesize(body.decode('utf-8'), )
 
-                result = model.synthesize(body.decode('utf-8'), raw_format=True)
-                self.send_voice_queue(result)
-                # x = AudioSegment.from_mp3(result)
+                play(result)
+
+                return
+

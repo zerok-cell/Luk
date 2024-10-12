@@ -4,7 +4,7 @@ import pika
 from pydub import AudioSegment
 from pydub.playback import play
 from sounddevice import play, stop
-
+from numpy import array
 from tools import getconfig
 
 
@@ -16,8 +16,10 @@ class Player(object):
 
     def player(self, ch, method, properties, sound):
         if self.config == 'YA':
+            print(sound)
+            ar = array(sound)
+            print(ar)
             x = AudioSegment(sound)
-            print('dawdwa')
             play(x)
         else:
             print('dawdwa')

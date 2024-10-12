@@ -8,9 +8,8 @@ from sounddevice import play
 from soundfile import read
 from tools import getconfig
 from ollama import chat
-from google.api_core.exceptions import ResourceExhausted
-from time import sleep
-from colorama import  Fore
+from .Gemini import GeminiAi
+
 
 class Ai:
     def __init__(self) -> None:
@@ -33,29 +32,9 @@ class Ai:
             },
 
         ]
-        self.genconf = {
-            "temperature": 1,
-            "top_p": self.config["GEMINI"]["TOP_P"],
-            "top_k": int(self.config["GEMINI"]["TOP_K"]),
-            "max_output_tokens": self.config["GEMINI"]["OUTPUT_TOKEN"],  # TODO: configs token
-            "response_mime_type": "text/plain",
-        }
 
-        self.geminiContext = [
-            {
-                "role": "user",
-                "parts": [
-                    f"{self.config['GEMINI']['PROMT'] if self.config['GEMINI']['PROMT'] != '' else 'Будь собой'}",
-                ],
-            },
-            {
-                "role": "model",
-                "parts": [
-                    "Хорошо я буду им \n",
-                ],
-            },
-        ]
-        self.all_path = [file for file in Path("./timeslep/").glob("*")]
+        self.all_path = [file for file in Path("../timeslep/").glob("*")]
+        self.gemini = GeminiAi(config=self.config)
 
     def expectation(self):
         choicewav = choice(self.all_path)
@@ -77,45 +56,9 @@ class Ai:
         conn, channel = self.queemq_create()
         # TODO here config
         if self.config["GEMINI"]["MODE"] == 'Gemini':
-            _memory_user = {
-                "role": "user",
-                "parts": [
-                    text
-                ]
-            }
-            print(text)
-            # self.expectation()
-            data_in_pamat_user = {"role": "user", "content": text}
-            self.pamat.append(data_in_pamat_user)
-            genai.configure(api_key=self.config["GEMINI"]['GEMINI_API_KEY'])
-            model = genai.GenerativeModel(
-                model_name="gemini-1.5-flash",
-            )
-
-            chat_session = model.start_chat(
-                history=self.geminiContext)
-            try:
-                response = chat_session.send_message(text)
-                _memory_model = {
-                    "role": "model",
-                    "parts": [
-                        response.text
-                    ]
-                }
-                print(response.text)
-                self.geminiContext.append(_memory_user)
-                self.geminiContext.append(_memory_model)
-                channel.basic_publish(exchange='', routing_key='message', body=response.text)
-
-            except ResourceExhausted as e:
-                print("The quota per minute is exhausted, switch to the paid API tariff or wait 1 minute for the quota "
-                      "to become 15 requests again")
-                print(Fore.RED + "Request send after 1 minute")
-                sleep(60)
-                self.question(text=text)
-            finally:
-                return True
-
+            _response = self.gemini.gemini_send(text, channel=channel, conn=conn)
+            if not _response:
+                return False
         else:
             # Локальная модель пользователя
             local = chat(
@@ -134,7 +77,6 @@ class Ai:
                     _from_queue = "".join(chunk_dot)
                     channel.basic_publish(exchange='', routing_key='message', body=_from_queue)
                     chunk_dot.clear()
-        conn.close()
 
         # res_text = "".join(for_pamat)
         # print(res_text)
