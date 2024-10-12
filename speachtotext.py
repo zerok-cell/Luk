@@ -1,9 +1,9 @@
-from json import loads
+
 
 from colorama import Fore, Style
 from pyaudio import PyAudio, paInt16
-from vosk import KaldiRecognizer, Model
-from fuzzywuzzy.process import extractOne
+
+
 
 
 class SpeachToText:
@@ -20,11 +20,13 @@ class SpeachToText:
         )
 
     def checksumm(self, text):
-        if extractOne('коди', text)[1] > 60:
+        from fuzzywuzzy.process import extractOne
+        if extractOne('коде', text)[1] >= 80:
             return True
         return False
 
     def speachtotext(self):
+        from vosk import KaldiRecognizer, Model
         model = Model("model")
         recognizer = KaldiRecognizer(model, self.sampl)
 
@@ -39,6 +41,7 @@ class SpeachToText:
 
             if recognizer.AcceptWaveform(data):
                 result = recognizer.Result()
+                from json import loads
                 text = str(loads(result)["text"])
                 print(text.strip())
                 if (text.strip() != '') and (len(text) > 2):
@@ -48,9 +51,9 @@ class SpeachToText:
                         return text
                     return False
 
-            else:
-                partial_result = recognizer.PartialResult()
-                partial_text = loads(partial_result)["partial"]
+            # else:
+            #     partial_result = recognizer.PartialResult()
+            #     partial_text = loads(partial_result)["partial"]
 
-                if partial_text == "стоп":
-                    exit()
+            #     if partial_text == "стоп":
+            #         exit()

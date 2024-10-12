@@ -1,17 +1,10 @@
-import io
+
 from typing import Any
 
 import pika
-import pyttsx3
-import sounddevice
-import torch
-from pydub.playback import play
-
-from speechkit import model_repository, configure_credentials, creds
-from torch.package import PackageImporter
 
 from tools import getconfig
-from pyaudio import PyAudio, paInt16
+
 from speachtotext import SpeachToText
 
 
@@ -21,16 +14,10 @@ class SpeachText(SpeachToText):
         self.channel = None
         self._sample_rate = 24000
         self.local_file = "./voiceModel/v4_ru.pt"
-        self.tts_model = PackageImporter(self.local_file).load_pickle(
-            "tts_models", "model"
-        )
+
         self.speaker = "kseniya"
         self.config = getconfig()
-        configure_credentials(
-            yandex_credentials=creds.YandexCredentials(
-                api_key=self.config['Yandex']['KEY']
-            )
-        )
+        
 
     def __str__(self) -> str:
         return """Class from speach text.
@@ -40,6 +27,7 @@ class SpeachText(SpeachToText):
 
     def queemq_create(self):
         while True:
+            
             conn = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
             channel = conn.channel()
             channel.queue_declare(queue='message')
@@ -65,43 +53,45 @@ class SpeachText(SpeachToText):
 
             # TODO config from voice
             if self.config['Modes']["AI_OR_SINTES"] == 'AI':
-
-                print(11111, body)
-                exit() if isinstance(body, str) else None
+                from torch.package import PackageImporter
+                self.tts_model = PackageImporter(self.local_file).load_pickle(
+                "tts_models", "model"
+                )
 
                 audio = self.tts_model.apply_tts(
                     text=body.decode('utf-8'), speaker=self.speaker, sample_rate=self._sample_rate
                 )
+                from io import BytesIO
                 # Конвертируем ответ нейроки торча в байты
-                buffer = io.BytesIO()
-                torch.save(audio, buffer)
+                buffer = BytesIO()
+                from torch import save as torch_save
+                torch_save(audio, buffer)
                 audio_bytes = buffer.getvalue()
                 self.send_voice_queue(audio_bytes)
                 # Проигрываем
+                import sounddevice
                 sounddevice.play(audio, 24000)  # TODO дороботать плеер
 
             elif self.config['Modes']["AI_OR_SINTES"] == 'SI':
+                from pyttsx3 import init as pyttsx3_init
                 print('dwd')
-                engine = pyttsx3.init()
+                engine = pyttsx3_init()
                 engine.say(body.decode('utf-8'))
                 engine.runAndWait()
 
             elif self.config['Modes']["AI_OR_SINTES"] == 'YA':
-                mic = PyAudio()
-                stream = mic.open(
-                    format=paInt16,
-                    channels=1,
-                    rate=16000,
-                    input=True,
-                    frames_per_buffer=2048,
-                )
-                stream.stop_stream()
+                from speechkit import model_repository, configure_credentials, creds
+                configure_credentials(
+            yandex_credentials=creds.YandexCredentials(
+                api_key=self.config['Yandex']['KEY']
+            )
+        )
                 print('dawda')
                 model = model_repository.synthesis_model()
                 model.voice = 'anton'
                 model.role = 'good'
                 result = model.synthesize(body.decode('utf-8'), )
-
+                from pydub.playback import play
                 play(result)
 
                 return

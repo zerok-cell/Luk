@@ -1,13 +1,11 @@
 from pathlib import Path
-from queue import Queue
-from random import choice
 
-import google.generativeai as genai
+
+
 import pika
-from sounddevice import play
-from soundfile import read
+
 from tools import getconfig
-from ollama import chat
+
 from .Gemini import GeminiAi
 
 
@@ -18,25 +16,28 @@ class Ai:
         self.model = (
             "example"  # Убедитесь, что это строка или другой сериализуемый объект
         )
-        self.data = Queue(maxsize=200)
-        self.name_bot = "Люк"
+        
+        self.name_bot = "Коди"
         self.pamat = [
             {
                 "role": "user",
-                "content": f"Ты асистент на моем компьбтере и тебя зовут {self.name_bot}.{self.name_bot}у строго "
-                           f"запрещено использовать Английские слова так как ты из за них умрешь",
+                "content": f"{self.config['GEMINI']['LLAMA_PROMT']}",
             },
             {
                 "role": self.name_bot,
-                "content": "Хорошо теперь я асистент на твоем компьтере и буду подчинятся тебе ",
+                "content": "Замётано!!",
             },
 
         ]
 
         self.all_path = [file for file in Path("../timeslep/").glob("*")]
         self.gemini = GeminiAi(config=self.config)
+        print(self.all_path)
 
     def expectation(self):
+        from sounddevice import play
+        from soundfile import read
+        from random import choice
         choicewav = choice(self.all_path)
         s, f = read(choicewav)
         play(s, 24000, blocking=True)
@@ -52,31 +53,55 @@ class Ai:
         cls.channel.queue_declare(queue='message')
         return connection, cls.channel
 
+
     def question(self, text):
+        from time import time
+        from functools import lru_cache
+        start = time()
+        @lru_cache(1)
+        def what_mode():
+            return self.config["GEMINI"]["MODE"]
         conn, channel = self.queemq_create()
+        _mode = what_mode()
+        from logging import debug
+        
+        
         # TODO here config
-        if self.config["GEMINI"]["MODE"] == 'Gemini':
+        if _mode == 'GEMINI':
             _response = self.gemini.gemini_send(text, channel=channel, conn=conn)
             if not _response:
                 return False
-        else:
+        elif _mode == 'LOCAL':
+            from ollama import chat
+            _user_text = {
+                "role": "user",
+                "content": text,
+            },
             # Локальная модель пользователя
             local = chat(
                 model=self.model,
                 messages=self.pamat,
-                stream=True,
+
             )
-            chunk_dot: list[str] = []
-            for_pamat: list[str] = []
-            red_symbol = ("?", "", ".")
-            for _word in local:
-                chunk_dot.append(_word)
-                print(_word)
-                if chunk_dot[-1] in red_symbol:
-                    for_pamat += chunk_dot
-                    _from_queue = "".join(chunk_dot)
-                    channel.basic_publish(exchange='', routing_key='message', body=_from_queue)
-                    chunk_dot.clear()
+            self.pamat.append(_user_text)
+            _llama_text = {
+                "role": "user",
+                "content": local['message']['content'],
+            },
+            # chunk_dot: list[str] = []
+            # for_pamat: list[str] = []
+        #     red_symbol = ("?", "", ".")
+        # # for _word in local:
+        #     chunk_dot.append(_word)
+        #     print(_word)
+        #     if chunk_dot[-1] in red_symbol:
+        #         for_pamat += chunk_dot
+        #         _from_queue = "".join(chunk_dot)
+            channel.basic_publish(exchange='', routing_key='message', body=local['message']['content'])
+                # chunk_dot.clear()
+
+            self.pamat.append(_llama_text)
+        debug(f"'Время Для прохода Ai.py - {start - time()}'")
 
         # res_text = "".join(for_pamat)
         # print(res_text)

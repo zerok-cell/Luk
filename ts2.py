@@ -1,7 +1,9 @@
-from json import load
-import subprocess
-x = 'start chrome https://www.youtube.com '
+import  pyttsx3
+from time import sleep
+ix = pyttsx3.init()
 
-d = x.split()
-subprocess.run(d,shell=True)
-print()
+for i in range(1,1000):
+    sleep(1)
+    ix.say("спасибо папа")
+    ix.runAndWait()
+    print("Спасибо пап")

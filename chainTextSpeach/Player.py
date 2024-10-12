@@ -1,10 +1,3 @@
-from time import sleep
-
-import pika
-from pydub import AudioSegment
-from pydub.playback import play
-from sounddevice import play, stop
-from numpy import array
 from tools import getconfig
 
 
@@ -17,19 +10,25 @@ class Player(object):
     def player(self, ch, method, properties, sound):
         if self.config == 'YA':
             print(sound)
+            from numpy import array
             ar = array(sound)
             print(ar)
+            from pydub import AudioSegment
             x = AudioSegment(sound)
-            play(x)
+            from pydub.playback import play as pydub_play
+            pydub_play(x)
         else:
+            from sounddevice import play, stop
             print('dawdwa')
             sample_rate = 24000
             play(sound, sample_rate)
+            from time import sleep
             sleep(len(sound) / sample_rate + 1)
             stop()
         self.queue_consuming()
 
     def queue_consuming(self):
+        import pika
         conn = pika.BlockingConnection(pika.ConnectionParameters(self.host))
         channel = conn.channel()
         channel.queue_declare(queue=self.name_queue)

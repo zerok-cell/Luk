@@ -1,18 +1,15 @@
-from google.api_core.exceptions import ResourceExhausted
-from colorama import Fore
-from time import sleep
+
+
 from functools import lru_cache
-import google.generativeai as genai
-import subprocess
-from google.generativeai.types.generation_types import StopCandidateException
-from sounddevice import play
-from pathlib import Path
-from random import choice
-from soundfile import read
+
+
+
+
 
 
 class GeminiAi(object):
     def __init__(self, config):
+
         self.config = config
         self.geminiContext = [
             {
@@ -36,19 +33,24 @@ class GeminiAi(object):
             "max_output_tokens": self.config["GEMINI"]["OUTPUT_TOKEN"],  # TODO: configs token
             "response_mime_type": "text/plain",
         }
-        self._protest = [file for file in Path("./song_protest/").glob("*")]
+        
 
-        for i in Path("./song_protest/").glob("*"):
-            print(i)
+
 
     # TODO доделать выбор звуков для ошибки политики генерации текста.
     def protest(self):
-
-        choicewav = choice(self._protest)
+        from soundfile import read
+        from sounddevice import play
+        from pathlib import Path
+        from random import choice
+        _protest = [file for file in Path(r"C:\Works\Luk\allai\song_protest").glob("*")]
+        choicewav = choice(_protest)
         s, f = read(choicewav)
         play(s, 24000, blocking=True)
 
     def gemini_send(self, text: str, channel, conn):
+        from google.generativeai.types.generation_types import StopCandidateException
+        from google.api_core.exceptions import ResourceExhausted
         _model = self.config_gemin()
         _memory_user = {
             "role": "user",
@@ -60,6 +62,7 @@ class GeminiAi(object):
             history=self.geminiContext)
         try:
             try:
+
                 response = chat_session.send_message(text)
             except StopCandidateException as stp:
                 print("Запрещеный контнет")
@@ -75,6 +78,7 @@ class GeminiAi(object):
             check = response.text.split()
             print(check)
             if check[0] == 'CMD':
+                import subprocess
                 print(check[1:])
                 subprocess.run(check[1:], shell=True)
             else:
@@ -82,8 +86,10 @@ class GeminiAi(object):
                 self.update_memory_gemini(_memory_user, _memory_model)
 
         except ResourceExhausted as e:
+            from time import sleep
             print("The quota per minute is exhausted, switch to the paid API tariff or wait 1 minute for the quota "
                   "to become 15 requests again")
+            from colorama import Fore
             print(Fore.RED + "Request send after 1 minute")
             sleep(60)
             self.gemini_send(text=text, channel=channel, conn=conn)
@@ -97,6 +103,7 @@ class GeminiAi(object):
 
     @lru_cache(2)
     def config_gemin(self):
+        import google.generativeai as genai
         genai.configure(api_key=self.config["GEMINI"]['GEMINI_API_KEY'])
         _model = genai.GenerativeModel(
             model_name="gemini-1.5-flash",

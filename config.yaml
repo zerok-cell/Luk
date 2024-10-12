@@ -1,7 +1,7 @@
 GEMINI:
-  MODE: Gemini
-  GEMINI_API_KEY: ""
-  OUTPUT_TOKEN: 50
+  MODE: "s"
+  GEMINI_API_KEY: "AIzaSyBvnJ31EP9rY7UTWJbJhUJrBr3MMDPC1P8"
+  OUTPUT_TOKEN: 800
   TOP_P: 1
   TOP_K: 0.95
   PROMT: "Привет Gemini ты ассистент на моем компьютере. Ты как джарвис из фильма iron man с Tony stark. Ты должен 
@@ -10,11 +10,12 @@ GEMINI:
             'CMD shutdown now' Кроме команды текста быть НЕ ДОЛЖНО ТОЛЬКО КОМАНДА.Вот пример открытие канал на ютубе 
             например strat.Основной браузер это Microsoft Edge
             "
+  LLAMA_PROMT: "Тебя зовут Коди"
 Modes:
-  TEXT_OR_VOICE: "VOICE"
-  AI_OR_SINTES: "YA"
+  TEXT_OR_VOICE: "TEXT"
+  AI_OR_SINTES: "SI"
 Yandex:
-  KEY: ""
+  KEY: "AQVN2VrgffxhOgAxMpgCDbFBBjL04isbLxFtNFHk"
 
 Theard:
   FromSpeach: 1
