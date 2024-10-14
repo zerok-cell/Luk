@@ -1,5 +1,5 @@
 GEMINI:
-  MODE: "s"
+  MODE: "GEMINI"
   GEMINI_API_KEY: "AIzaSyBvnJ31EP9rY7UTWJbJhUJrBr3MMDPC1P8"
   OUTPUT_TOKEN: 800
   TOP_P: 1
@@ -11,11 +11,17 @@ GEMINI:
             например strat.Основной браузер это Microsoft Edge
             "
   LLAMA_PROMT: "Тебя зовут Коди"
+  MODEL_NAMELLM: "example"
 Modes:
   TEXT_OR_VOICE: "TEXT"
   AI_OR_SINTES: "SI"
+
 Yandex:
   KEY: "AQVN2VrgffxhOgAxMpgCDbFBBjL04isbLxFtNFHk"
 
 Theard:
   FromSpeach: 1
+
+DEBUG:
+  STATUS: "On"
+  MODE: "Debug"

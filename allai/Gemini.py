@@ -1,17 +1,19 @@
-
-
 from functools import lru_cache
+from subprocess import CompletedProcess
 
+from google.generativeai.types import GenerateContentResponse
 
-
-
+from tools import getconfig
+from loguru import logger
+from .DataType.ResponseAi import ResponseAi
 
 
 class GeminiAi(object):
-    def __init__(self, config):
+    def __init__(self):
 
-        self.config = config
-        self.geminiContext = [
+        self.response = None
+        self.config = getconfig()
+        self.geminiContext: list[dict[str, list[str]]] = [
             {
                 "role": "user",
                 "parts": [
@@ -33,9 +35,6 @@ class GeminiAi(object):
             "max_output_tokens": self.config["GEMINI"]["OUTPUT_TOKEN"],  # TODO: configs token
             "response_mime_type": "text/plain",
         }
-        
-
-
 
     # TODO доделать выбор звуков для ошибки политики генерации текста.
     def protest(self):
@@ -48,58 +47,74 @@ class GeminiAi(object):
         s, f = read(choicewav)
         play(s, 24000, blocking=True)
 
-    def gemini_send(self, text: str, channel, conn):
+    def _no_quta(self, text: str) -> ResponseAi:
+        from time import sleep
+        from colorama import Fore
+        print("The quota per minute is exhausted, switch to the paid API tariff or wait 1 minute for the quota "
+              "to become 15 requests again")
+        print(Fore.RED + "Request send after 1 minute")
+        sleep(65)
+        return self.gemini_send(text=text)
+
+    @staticmethod
+    def execute_command(check: list[str]) -> CompletedProcess:
+        import subprocess
+        try:
+            subprocess.run(check[1:], shell=True)
+        except Exception as e:
+            print("Most likely, there is no such command or it was entered incorrectly")
+            logger.critical(f"Incorrect command: {''.join(check)}")
+
+    def gemini_send(self, text: str) -> ResponseAi:
         from google.generativeai.types.generation_types import StopCandidateException
         from google.api_core.exceptions import ResourceExhausted
         _model = self.config_gemin()
-        _memory_user = {
-            "role": "user",
-            "parts": [
-                text
-            ]
-        }
+        print(text)
         chat_session = _model.start_chat(
             history=self.geminiContext)
         try:
             try:
+                self.response = chat_session.send_message(text)
+                responseobj = ResponseAi()
+                responseobj.all = {'text': self.response.text,
+                                   "split_text": self.response.text.split(),
+                                   "token": self.response.usage_metadata.candidates_token_count}
 
-                response = chat_session.send_message(text)
             except StopCandidateException as stp:
                 print("Запрещеный контнет")
                 self.protest()
-                return False
-            _memory_model = {
-                "role": "model",
-                "parts": [
-                    response.text
-                ]
-            }
-            print(response.text)
-            check = response.text.split()
-            print(check)
+                logger.warning(f"Policy error on user text: {text}")
+                responseobj.reqstatus = False
+                return responseobj
+            print(responseobj.text)
+            check = responseobj.splittxt
             if check[0] == 'CMD':
-                import subprocess
-                print(check[1:])
-                subprocess.run(check[1:], shell=True)
+                self.execute_command(check)
             else:
-                channel.basic_publish(exchange='', routing_key='message', body=response.text)
-                self.update_memory_gemini(_memory_user, _memory_model)
-
+                print(text)
+                self.update_memory_gemini(model_text=responseobj.text, user_text=text)
         except ResourceExhausted as e:
-            from time import sleep
-            print("The quota per minute is exhausted, switch to the paid API tariff or wait 1 minute for the quota "
-                  "to become 15 requests again")
-            from colorama import Fore
-            print(Fore.RED + "Request send after 1 minute")
-            sleep(60)
-            self.gemini_send(text=text, channel=channel, conn=conn)
+            self._no_quta(text)
         finally:
-            conn.close()
+            return responseobj
 
-    def update_memory_gemini(self, user: dict[str, list | str],
-                             model: dict[str, list | str]):
+    def update_memory_gemini(self, model_text: str, user_text: str):
+
+        user = {
+            "role": "user",
+            "parts": [
+                user_text
+            ]
+        }
+        model = {
+            "role": "model",
+            "parts": [
+                model_text
+            ]
+        }
         self.geminiContext.append(user)
         self.geminiContext.append(model)
+        logger.info(f'UPDATE MEMORY: {self.geminiContext[2:]}')
 
     @lru_cache(2)
     def config_gemin(self):
