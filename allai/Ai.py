@@ -31,14 +31,14 @@ class Ai:
         # sleep(len(s) / 24000 + 2)
         # stop()
 
-    @classmethod
-    def queemq_create(cls):
-        print('ai')
-        _host = 'localhost'
-        connection = pika.BlockingConnection(pika.ConnectionParameters(_host))
-        cls.channel = connection.channel()
-        cls.channel.queue_declare(queue='message')
-        return connection, cls.channel
+    # @classmethod
+    # def queemq_create(cls):
+    #     print('ai')
+    #     _host = 'localhost'
+    #     connection = BlockingConnection(ConnectionParameters(_host))
+    #     cls.channel = connection.channel()
+    #     cls.channel.queue_declare(queue='message')
+    #     return connection, cls.channel
 
     @staticmethod
     def logging_function(func):

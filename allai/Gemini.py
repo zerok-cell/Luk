@@ -1,16 +1,20 @@
 from functools import lru_cache
+from tools import logging_message
 from subprocess import CompletedProcess
-
-from google.generativeai.types import GenerateContentResponse
+from google.api_core.exceptions import FailedPrecondition
 
 from tools import getconfig
-from loguru import logger
+
 from .DataType.ResponseAi import ResponseAi
 
 
 class GeminiAi(object):
+    status = None
+
     def __init__(self):
 
+        self.responseobj = None
+        self.chat_session = None
         self.response = None
         self.config = getconfig()
         self.geminiContext: list[dict[str, list[str]]] = [
@@ -37,7 +41,8 @@ class GeminiAi(object):
         }
 
     # TODO доделать выбор звуков для ошибки политики генерации текста.
-    def protest(self):
+    @staticmethod
+    def protest():
         from soundfile import read
         from sounddevice import play
         from pathlib import Path
@@ -56,47 +61,62 @@ class GeminiAi(object):
         sleep(65)
         return self.gemini_send(text=text)
 
-    @staticmethod
-    def execute_command(check: list[str]) -> CompletedProcess:
+    @classmethod
+    def execute_command(cls, check: list[str]) -> CompletedProcess:
         import subprocess
-        try:
-            subprocess.run(check[1:], shell=True)
-        except Exception as e:
-            print("Most likely, there is no such command or it was entered incorrectly")
-            logger.critical(f"Incorrect command: {''.join(check)}")
+        if check[0] == 'CMD':
+            try:
+                cls.status = subprocess.run(check[1:], shell=True)
+            except Exception as e:
+                print("Most likely, there is no such command or it was entered incorrectly")
+                logging_message('critical', f"Incorrect command: {''.join(check)} - {e}")
+            return cls.status
+        return
+
+    def try_from_request(self, func):
+        def wrapper(*args, **kwargs):
+            from google.generativeai.types.generation_types import StopCandidateException
+            from google.api_core.exceptions import ResourceExhausted
+            try:
+                try:
+                    try:
+                        self.res = func(*args, **kwargs)
+                    except ResourceExhausted as e:
+                        logging_message('waning', e)
+                        self._no_quta(args[0])
+
+                except FailedPrecondition as position:
+                    logging_message('warning', f"Not correct your possition {position}")
+                    self.responseobj.reqstatus = False
+                    return self.res
+
+            except StopCandidateException as trp:
+                self.protest()
+                logging_message('warning', f"Policy error on user text: {text} - {stp}")
+                self.res.reqstatus = False
+                return self.res
+            return self.res
+        return wrapper
+
+    @try_from_request
+    def request(self, text: str) -> ResponseAi:
+        responseobj = ResponseAi()
+        self.response = self.chat_session.send_message(text)
+        responseobj.all = {'text': self.response.text,
+                           "split_text": self.response.text.split(),
+                           "token": self.response.usage_metadata.candidates_token_count}
+        return responseobj
 
     def gemini_send(self, text: str) -> ResponseAi:
-        from google.generativeai.types.generation_types import StopCandidateException
-        from google.api_core.exceptions import ResourceExhausted
-        _model = self.config_gemin()
-        print(text)
-        chat_session = _model.start_chat(
-            history=self.geminiContext)
-        try:
-            try:
-                self.response = chat_session.send_message(text)
-                responseobj = ResponseAi()
-                responseobj.all = {'text': self.response.text,
-                                   "split_text": self.response.text.split(),
-                                   "token": self.response.usage_metadata.candidates_token_count}
 
-            except StopCandidateException as stp:
-                print("Запрещеный контнет")
-                self.protest()
-                logger.warning(f"Policy error on user text: {text}")
-                responseobj.reqstatus = False
-                return responseobj
-            print(responseobj.text)
-            check = responseobj.splittxt
-            if check[0] == 'CMD':
-                self.execute_command(check)
-            else:
-                print(text)
-                self.update_memory_gemini(model_text=responseobj.text, user_text=text)
-        except ResourceExhausted as e:
-            self._no_quta(text)
-        finally:
-            return responseobj
+        _model = self.config_gemin()
+        self.chat_session = _model.start_chat(
+            history=self.geminiContext)
+        self.responseobj = self.request(text)
+        check = self.responseobj.splittxt
+        self.execute_command(check)
+        self.update_memory_gemini(model_text=self.responseobj.text, user_text=text)
+        return self.responseobj
 
     def update_memory_gemini(self, model_text: str, user_text: str):
 
@@ -114,7 +134,7 @@ class GeminiAi(object):
         }
         self.geminiContext.append(user)
         self.geminiContext.append(model)
-        logger.info(f'UPDATE MEMORY: {self.geminiContext[2:]}')
+        logging_message('info', f'UPDATE MEMORY: {self.geminiContext[2:]}')
 
     @lru_cache(2)
     def config_gemin(self):

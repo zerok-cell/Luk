@@ -5,6 +5,12 @@ class ResponseAi:
         self.__split_text: list[str] = None
         self.__request_status: bool = None
 
+    def __bool__(self):
+        if self.reqstatus is False or None:
+            return False
+        else:
+            return True
+
     @property
     def all(self):
         return {

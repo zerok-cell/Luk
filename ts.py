@@ -1,17 +1,38 @@
-import pika
-import queue
+import tkinter as tk
+from tkinter import ttk
 
-pik = pika.BlockingConnection(pika.ConnectionParameters(host="localhost"))
-channel = pik.channel()
 
-class n():
-    pass
+root = tk.Tk()
+root.title("Тема окна")
 
-channel.queue_declare(queue='hello')
-x = queue.Queue(2)
-x.put('2')
-channel.basic_publish(exchange='', routing_key='hello', body=)
 
-print('send')
+button = ttk.Button(root, text="Переключить тему", command=lambda: toggle_theme())
+button.pack()
 
-pik.close()
+# Определяем текущую тему
+is_light_theme = True
+
+
+def toggle_theme():
+    global is_light_theme
+    print(is_light_theme)
+    is_light_theme = not is_light_theme
+    apply_theme()
+
+
+def apply_theme():
+    if is_light_theme:
+        root.configure(bg="black")
+        button.configureforeground=("black")
+    else:
+        root.configure(bg="white")
+        button.configureforeground=("white")
+        button.configureforeground=("white")
+
+
+if root.cget("bg") == "gray":
+    is_light_theme = False
+    apply_theme()
+
+root.mainloop()
+# Юз глобал варов 

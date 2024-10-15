@@ -1,14 +1,18 @@
-from threading import Thread
+import atexit
 
+from threading import Thread
+from tools import logging_message
 from allai.Ai import Ai
-from chainTextSpeach.Player import Player
-# from chainTextSpeach.Player import player
+# from chainTextSpeach.Player import Player
+
 from chainTextSpeach.SpeachText import SpeachText
 
 from tools import getconfig
 
 from loguru import logger
 from time import time
+
+logger.add('applog.log')
 
 
 class Interfaces(object):
@@ -19,12 +23,14 @@ class Interfaces(object):
         self.config = getconfig()
 
     def start(self):
-
         while True:
             if self.config["Modes"]["TEXT_OR_VOICE"] == 'TEXT':
                 from colorama import Fore
                 text = input(Fore.CYAN + ">>> ")
-                self.ai.question(text)
+                if text == 'exit':
+                    exit(code=exit_cody())
+                else:
+                    self.ai.question(text)
             elif self.config["Modes"]["TEXT_OR_VOICE"] == 'VOICE':
                 voice = self.spchText.speachtotext()
                 print(voice)
@@ -39,20 +45,18 @@ class Interfaces(object):
                 raise ValueError("Unexpected value, see config.yaml - ['Modes']['TEXT_OR_VOICE']")
 
 
-logger.add('applog.log')
-
-
 def time_log(start_time: float):
-    logger.info(f"{'-'*10}| PROGRAM START BEHIND: {round(time() - start_time, 3)}s |{'-'*10}")
-    logger.info(f"Startup Configuration: {getconfig()}")
+    logging_message('info', f"{'-' * 10}| PROGRAM START BEHIND: {round(time() - start_time, 3)}s |{'-' * 10}")
+    logging_message('info', f"Startup Configuration: {getconfig()}")
     return
 
 
 def main():
     if getconfig()['DEBUG']['STATUS'] == 'On':
         start = time()
+
     spch = SpeachText()
-    player = Player()
+    # player = Player()
     for _ in range(0, getconfig()["Theard"]["FromSpeach"]):
         Thread(target=spch.queemq_create).start()
 
@@ -62,12 +66,16 @@ def main():
     i.start()
 
 
+def exit_cody():
+    from os import environ
+    print('del')
+    if environ['CodyDebug']:
+        del environ['CodyDebug']
+    logging_message('info', f'{'-' * 10}| PROGRAM END BEHIND |{'-' * 10}')
+    return
+
+
 if __name__ == "__main__":
     main()
-    # basicConfig(
-    #     filename='app.log',
-    #     level=DEBUG,
-    #     format='%(asctime)s - %(levelname)s - %(message)s'
-    # )
-
-    # debug(f'Запущено за:"{time() - s}"')
+    atexit.register(exit_cody)
+    exit()
