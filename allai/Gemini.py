@@ -1,11 +1,13 @@
-from functools import lru_cache
+import asyncio
+from functools import lru_cache, wraps
 from tools import logging_message
 from subprocess import CompletedProcess
-from google.api_core.exceptions import FailedPrecondition
+
 
 from tools import getconfig
 
 from .DataType.ResponseAi import ResponseAi
+from .Decorators.GeminiSenDecorators import GeminiSendDecorators
 
 
 class GeminiAi(object):
@@ -41,25 +43,9 @@ class GeminiAi(object):
         }
 
     # TODO доделать выбор звуков для ошибки политики генерации текста.
-    @staticmethod
-    def protest():
-        from soundfile import read
-        from sounddevice import play
-        from pathlib import Path
-        from random import choice
-        _protest = [file for file in Path(r"C:\Works\Luk\allai\song_protest").glob("*")]
-        choicewav = choice(_protest)
-        s, f = read(choicewav)
-        play(s, 24000, blocking=True)
 
-    def _no_quta(self, text: str) -> ResponseAi:
-        from time import sleep
-        from colorama import Fore
-        print("The quota per minute is exhausted, switch to the paid API tariff or wait 1 minute for the quota "
-              "to become 15 requests again")
-        print(Fore.RED + "Request send after 1 minute")
-        sleep(65)
-        return self.gemini_send(text=text)
+
+
 
     @classmethod
     def execute_command(cls, check: list[str]) -> CompletedProcess:
@@ -73,46 +59,26 @@ class GeminiAi(object):
             return cls.status
         return
 
-    def try_from_request(self, func):
-        def wrapper(*args, **kwargs):
-            from google.generativeai.types.generation_types import StopCandidateException
-            from google.api_core.exceptions import ResourceExhausted
-            try:
-                try:
-                    try:
-                        self.res = func(*args, **kwargs)
-                    except ResourceExhausted as e:
-                        logging_message('waning', e)
-                        self._no_quta(args[0])
-
-                except FailedPrecondition as position:
-                    logging_message('warning', f"Not correct your possition {position}")
-                    self.responseobj.reqstatus = False
-                    return self.res
-
-            except StopCandidateException as trp:
-                self.protest()
-                logging_message('warning', f"Policy error on user text: {text} - {stp}")
-                self.res.reqstatus = False
-                return self.res
-            return self.res
-        return wrapper
-
-    @try_from_request
-    def request(self, text: str) -> ResponseAi:
+    # @GeminiSendDecorators  # TODO доделать декоратор на основе класса
+    async def request(self, text: str) -> ResponseAi:
+        print('After await')
         responseobj = ResponseAi()
-        self.response = self.chat_session.send_message(text)
+
+        self.response = await asyncio.create_task(self.chat_session.send_message_async(text))
+        print('Berofre await')
         responseobj.all = {'text': self.response.text,
                            "split_text": self.response.text.split(),
                            "token": self.response.usage_metadata.candidates_token_count}
+        print(responseobj.text)
         return responseobj
 
-    def gemini_send(self, text: str) -> ResponseAi:
-
+    async def gemini_send(self, text: str) -> ResponseAi:  # TODO перейти на асинхроные запросы
+        print('gemini send')
         _model = self.config_gemin()
         self.chat_session = _model.start_chat(
             history=self.geminiContext)
-        self.responseobj = self.request(text)
+        self.responseobj = await self.request(text)
+        print('d')
         check = self.responseobj.splittxt
         self.execute_command(check)
         self.update_memory_gemini(model_text=self.responseobj.text, user_text=text)

@@ -1,3 +1,4 @@
+import asyncio
 import atexit
 
 from threading import Thread
@@ -22,7 +23,8 @@ class Interfaces(object):
         self.ai = Ai()
         self.config = getconfig()
 
-    def start(self):
+    async def start(self):
+        import asyncio
         while True:
             if self.config["Modes"]["TEXT_OR_VOICE"] == 'TEXT':
                 from colorama import Fore
@@ -32,14 +34,20 @@ class Interfaces(object):
                 else:
                     self.ai.question(text)
             elif self.config["Modes"]["TEXT_OR_VOICE"] == 'VOICE':
-                voice = self.spchText.speachtotext()
-                print(voice)
-                print("VOICE: " + voice)
-                response = self.ai.question(voice)
-                if response:
-                    print("AI: " + response)
-                else:
-                    continue
+                voice = await asyncio.create_task(self.spchText.speachtotext())
+                # print(voice)
+                # # voice = self.spchText.speachtotext()
+                # print(voice)
+                # print("VOICE: " + voice)
+                # response = self.ai.question(voice)
+                print(123)
+                response = asyncio.create_task(self.ai.question(voice))
+                print(123)
+                # if response:
+                #     pass
+                #     # print("AI: " + response.text)
+                # else:
+                #     continue
             else:
                 print(self.config["Modes"]["TEXT_OR_VOICE"])
                 raise ValueError("Unexpected value, see config.yaml - ['Modes']['TEXT_OR_VOICE']")
@@ -51,7 +59,7 @@ def time_log(start_time: float):
     return
 
 
-def main():
+async def main():
     if getconfig()['DEBUG']['STATUS'] == 'On':
         start = time()
 
@@ -63,7 +71,7 @@ def main():
     i = Interfaces()
     if getconfig()['DEBUG']['STATUS'] == 'On':
         time_log(start)
-    i.start()
+    await i.start()
 
 
 def exit_cody():
@@ -76,6 +84,6 @@ def exit_cody():
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
     atexit.register(exit_cody)
     exit()

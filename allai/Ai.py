@@ -1,3 +1,4 @@
+import asyncio
 from pathlib import Path
 
 from tools import getconfig
@@ -56,12 +57,14 @@ class Ai:
                 return func
         return wrapper
 
-    @logging_function
-    def question(self, text):
+    # @logging_function
+    async def question(self, text):
+        print('AI')
         _mode = self.config["GEMINI"]["MODE"]
 
         if _mode == 'GEMINI':
-            _response = self.gemini.gemini_send(text)
+            print('AI')
+            _response = await self.gemini.gemini_send(text)
             self.pika.send(_response.text)
             return _response
 

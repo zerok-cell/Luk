@@ -27,7 +27,7 @@ class SpeachToText:
                 return True
             return False
 
-    def speachtotext(self):
+    async def speachtotext(self):
         from vosk import KaldiRecognizer, Model
         model = Model("model")
         recognizer = KaldiRecognizer(model, self.sampl)
