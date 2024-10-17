@@ -41,7 +41,7 @@ class Interfaces(object):
                 # print("VOICE: " + voice)
                 # response = self.ai.question(voice)
                 print(123)
-                response = asyncio.create_task(self.ai.question(voice))
+                response = await asyncio.create_task(self.ai.question(voice))
                 print(123)
                 # if response:
                 #     pass
@@ -79,7 +79,7 @@ def exit_cody():
     print('del')
     if environ['CodyDebug']:
         del environ['CodyDebug']
-    logging_message('info', f'{'-' * 10}| PROGRAM END BEHIND |{'-' * 10}')
+    logging_message('info', f'{"-" * 10}| PROGRAM END BEHIND |{"-" * 10}')
     return
 
 

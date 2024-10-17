@@ -1,18 +1,14 @@
-import asyncio
+class Pididi(object):
+    def __init__(self, rajab):
+        print(self, rajab)
 
+lol = Pididi("rajab")
 
-async def x():
-    await asyncio.sleep(5)
-    print('1231231232')
+class Don(object):
+        def __init__(self):
+             
+        def x(self)
 
-
-async def y():
-    print('1232')
-
-
-async def main():
-    asyncio.create_task(x())
-    asyncio.create_task(y())
-
-
-asyncio.run(main())
+def ghgh(ggh, ff):
+    return ggh + ff
+print(ghgh(12,11))

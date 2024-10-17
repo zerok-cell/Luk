@@ -4,6 +4,7 @@ from logging import debug
 from tools import getconfig
 
 
+
 class SpeachToText:
     def __init__(self):
         self.device = 1
@@ -22,7 +23,7 @@ class SpeachToText:
         from fuzzywuzzy.process import extractOne
         print(text)
         if len(text) >= 2:
-            if extractOne('коде', text)[1] >= 80:
+            if extractOne('раджаб', text)[1] >= 40:
                 print(12)
                 return True
             return False
