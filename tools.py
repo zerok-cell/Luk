@@ -1,4 +1,4 @@
-
+from abc import ABC, abstractmethod
 from functools import lru_cache
 
 
@@ -31,4 +31,25 @@ def logging_message(level: str, text: str):
                 logger.critical(text)
     else:
         return
+
+
+class BaseFromCommand(ABC):
+    
+    @abstractmethod
+    def execute(self):
+        pass
+
+    @abstractmethod  
+    def __str__(self):
+        pass
+
+
+
+    def word_check(self, text:dir, word:str, sensity:int):
+        from fuzzywuzzy.process import extractOne
+        if  extractOne(word, text)[1] >= sensity:
+            self.execute()
+
+
+   
 

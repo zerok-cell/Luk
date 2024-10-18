@@ -1,7 +1,7 @@
 
 class ScanDir:
     def __init__(self):
-        self.path = "../../../Plugins/"
+        self.path = "./Plugins/"
         self.plugins = []
     
     def scan(self):
