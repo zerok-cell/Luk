@@ -1,7 +1,7 @@
 from colorama import Fore, Style
 from pyaudio import PyAudio, paInt16
 from logging import debug
-from tools import getconfig
+from other.tools import getconfig
 
 
 

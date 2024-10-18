@@ -1,10 +1,10 @@
 import asyncio
 from functools import lru_cache, wraps
-from tools import logging_message
+from other.tools import logging_message
 from subprocess import CompletedProcess
 
 
-from tools import getconfig
+from other.tools import getconfig
 
 from .DataType.ResponseAi import ResponseAi
 from .Decorators.GeminiSenDecorators import GeminiSendDecorators

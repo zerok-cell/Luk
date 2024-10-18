@@ -3,7 +3,7 @@ from typing import Any
 
 import pika
 
-from tools import getconfig
+from other.tools import getconfig
 
 from speachtotext import SpeachToText
 from loguru import logger

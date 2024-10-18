@@ -1,4 +1,4 @@
-from tools import logging_message
+from other.tools import logging_message
 
 
 class GeminiSendDecorators(object):

@@ -2,13 +2,13 @@ import asyncio
 import atexit
 
 from threading import Thread
-from tools import logging_message
+from other.tools import logging_message
 from allai.Ai import Ai
 # from chainTextSpeach.Player import Player
 
 from chainTextSpeach.SpeachText import SpeachText
 
-from tools import getconfig
+from other.tools import getconfig
 
 from loguru import logger
 from time import time
@@ -32,7 +32,7 @@ class Interfaces(object):
                 if text == 'exit':
                     exit(code=exit_cody())
                 else:
-                    self.ai.question(text)
+                    await self.ai.question(text)
             elif self.config["Modes"]["TEXT_OR_VOICE"] == 'VOICE':
                 voice = await asyncio.create_task(self.spchText.speachtotext())
                 # print(voice)

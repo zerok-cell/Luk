@@ -1,4 +1,4 @@
-from tools import getconfig
+from other.tools import getconfig
 
 
 class Player(object):

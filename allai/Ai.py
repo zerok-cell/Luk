@@ -1,7 +1,7 @@
 import asyncio
 from pathlib import Path
 
-from tools import getconfig
+from other.tools import getconfig
 from .DataType.PikaType import PikaType
 
 from .Gemini import GeminiAi
