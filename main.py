@@ -34,13 +34,14 @@ class Interfaces(object):
                 else:
                     await self.ai.question(text)
             elif self.config["Modes"]["TEXT_OR_VOICE"] == 'VOICE':
-                voice = await asyncio.create_task(self.spchText.speachtotext())
+                voice = self.spchText.speachtotext()
                 # print(voice)
                 # # voice = self.spchText.speachtotext()
                 # print(voice)
                 # print("VOICE: " + voice)
                 # response = self.ai.question(voice)
                 print(123)
+
                 response = await asyncio.create_task(self.ai.question(voice))
                 print(123)
                 # if response:

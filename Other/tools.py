@@ -47,7 +47,7 @@ class BaseFromCommand(ABC):
     def __call__(self, *args, **kwargs):
         pass
 
-    def word_check(self, ):
+    def word_check(self):
         from fuzzywuzzy.process import extractOne
         data = extractOne(self.word, self.text)[1]
         if data >= self.sensity:

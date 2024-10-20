@@ -1,12 +1,11 @@
-from colorama import Fore, Style
-from pyaudio import PyAudio, paInt16
-from logging import debug
-from Other.tools import getconfig
 
+from Command.ExecutePlugins import LaunchPlugin
+from Other.tools import getconfig
 
 
 class SpeachToText:
     def __init__(self):
+        from pyaudio import PyAudio, paInt16
         self.device = 1
         self.sampl = 16000
         self.mic = PyAudio()
@@ -18,19 +17,23 @@ class SpeachToText:
             frames_per_buffer=2048,
         )
         self.config = getconfig()
+        self.x = LaunchPlugin()
 
     def checksumm(self, text):
         from fuzzywuzzy.process import extractOne
         print(text)
-        if len(text) >= 2:
-            if extractOne('раджаб', text)[1] >= 40:
-                print(12)
-                return True
+        if extractOne('раджаб', text)[1] >= 90:
+            print(extractOne('раджаб', text)[1])
+            return True
+        else:
+            x = self.x.executeplugin(text)
             return False
 
-    async def speachtotext(self):
+    def speachtotext(self):
+        from colorama import Fore, Style
+
         from vosk import KaldiRecognizer, Model
-        model = Model("model")
+        model = Model(r"C:\Users\User\PycharmProjects\CodyV2\VoiceAi\model")
         recognizer = KaldiRecognizer(model, self.sampl)
         self.stream.start_stream()
         print(Fore.GREEN + Style.BRIGHT + "Начинаем распознавание...")
@@ -40,10 +43,13 @@ class SpeachToText:
                 result = recognizer.Result()
                 from json import loads
                 text = str(loads(result)["text"])
-                split_text = text.split()
+                split_text = text
+                print('dad')
                 if len(text) == 0:
                     continue
-                if exitstluk := self.checksumm(split_text):
+
+                exitstluk = self.checksumm(split_text)
+                if exitstluk:
                     return ' '.join(split_text)
                 continue
             # else:
@@ -52,3 +58,6 @@ class SpeachToText:
 
             #     if partial_text == "стоп":
             #         exit()
+
+
+
