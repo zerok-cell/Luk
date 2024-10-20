@@ -12,13 +12,12 @@ class Plugin(BaseFromCommand):
         super().__init__(text, self.word)
 
     def __call__(self):
-        print('123123123123')
         from subprocess import run
         run(['explorer'], shell=True)
         run(['start', 'microsoft-edge:'], shell=True)
 
     def __str__(self):
-        docs: str = "RJB"
+        docs: str = "Pligin from work, open Pycharm and Microsoft-edge"
         return docs
 
 
