@@ -7,17 +7,24 @@ import os
 class Plugin(BaseFromCommand):
     def __init__(self, text: list[str]):
         self.text = text
-        self.word = "работаем"
+        self.word = "проводник"
         self.pycharm = Path(os.path.join(os.path.expanduser(r'~'), r"AppData\Local\Programs\PyCharm Community\bin"))
         super().__init__(text, self.word)
 
     def __call__(self):
         from subprocess import run
-        run(['explorer'], shell=True)
-        run(['start', 'microsoft-edge:'], shell=True)
+        from fuzzywuzzy import fuzz
+        count_explorer = 0
+
+        for word in self.text:
+            print(fuzz.ratio('проводник', word))
+            if fuzz.ratio('проводник', word) > 70:
+                count_explorer += 1
+        for _ in range(count_explorer):
+            run(['explorer'], shell=True)
 
     def __str__(self):
-        docs: str = "A plugin that opens some programs creating a working environment, for example."
+        docs: str = "Pligin from open explorer"
         return docs
 
 

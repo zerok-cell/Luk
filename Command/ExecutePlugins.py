@@ -25,7 +25,6 @@ class LaunchPlugin:
                 instanceplug = plugin.Plugin(text)
                 __wordchk = instanceplug.word_check()
                 if __wordchk:
-                    print('dc2xz')
                     instanceplug()
 
 

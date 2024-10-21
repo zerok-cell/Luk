@@ -21,7 +21,6 @@ class SpeachToText:
 
     def checksumm(self, text):
         from fuzzywuzzy.process import extractOne
-        print(text)
         if extractOne('раджаб', text)[1] >= 90:
             print(extractOne('раджаб', text)[1])
             return True
@@ -43,12 +42,11 @@ class SpeachToText:
                 result = recognizer.Result()
                 from json import loads
                 text = str(loads(result)["text"])
-                split_text = text
-                print('dad')
+                split_text = text.split()
                 if len(text) == 0:
                     continue
-
                 exitstluk = self.checksumm(split_text)
+
                 if exitstluk:
                     return ' '.join(split_text)
                 continue

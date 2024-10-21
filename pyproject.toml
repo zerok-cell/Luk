@@ -23,6 +23,7 @@ soundfile = "^0.12.1"
 pyyaml = "^6.0.2"
 fuzzywuzzy = "^0.18.0"
 python-levenshtein = "^0.26.0"
+pynput = "^1.7.7"
 
 
 [build-system]
