@@ -23,7 +23,7 @@ class LaunchPlugin:
         return False
 
     def packagelevel(self, path_pakage: str, text, folder):
-        from ScaningDir import ScanDir
+        from .ScaningDir import ScanDir
         pathplug = Path(path_pakage)
         print(pathplug)
         print(pathplug.stem.split('/')[-1])
@@ -45,8 +45,8 @@ class LaunchPlugin:
                         instanceplug()
 
     def executeplugin(self, text: list[str]):
-        from ScaningDir import ScanDir
-        self.plg = "..\\Plugins"
+        from .ScaningDir import ScanDir
+        self.plg = ".\\Plugins"
         self.file = ScanDir(self.plg, 'py').scandir()
 
         for plug in self.file:
@@ -68,5 +68,5 @@ class LaunchPlugin:
                     instanceplug()
 
 
-x = LaunchPlugin()
-x.executeplugin(['проводник'])
+# x = LaunchPlugin()
+# x.executeplugin(['проводник'])

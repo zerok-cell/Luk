@@ -13,7 +13,7 @@ GEMINI:
   LLAMA_PROMT: "Тебя зовут Коди"
   MODEL_NAMELLM: "example"
 Modes:
-  TEXT_OR_VOICE: "TEXT"
+  TEXT_OR_VOICE: "VOICE"
   AI_OR_SINTES: "YA"
 
 Yandex:
