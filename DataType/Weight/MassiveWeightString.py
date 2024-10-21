@@ -1,6 +1,4 @@
-import time
-from functools import lru_cache
-from random import randint
+from typing import Iterator
 
 from StringWeight import StringWeight
 
@@ -8,16 +6,17 @@ from StringWeight import StringWeight
 class MassiveWeight(object):
     def __init__(self, *args: str):
         self.data_input = args
-        self.listweight: list[StringWeight] = []
+        self.__listweight: list[StringWeight] = []
+        self.index: int = 0
 
-    def genlist(self):
+    def genlist(self) -> list[StringWeight]:
         for string in self.data_input:
             if isinstance(string[0], str) and (isinstance(string[1], float)):
                 __string_weight = StringWeight(string[0], string[1])
-                self.listweight.append(__string_weight)
-        return self.listweight
+                self.__listweight.append(__string_weight)
+        return self.__listweight
 
-    def crushing_list(self, for_recursion: list = None) -> list:
+    def crushing_list(self, for_recursion: list | None = None) -> list:
         if len(for_recursion) <= 1:
             return for_recursion
         len_list = len(for_recursion) // 2
@@ -36,18 +35,24 @@ class MassiveWeight(object):
                 indexr += 1
         result.extend(left[indexl:])
         result.extend(right[indexr:])
-        self.listweight = result
+        self.__listweight = result
         return result
 
     def sorter(self):
-        self.crushing_list(self.listweight)
+        return self.crushing_list(self.__listweight)
 
-    def __str__(self):
-        return f"{self.listweight}"
+    def __getitem__(self, item: int) -> StringWeight:
+        if isinstance(item, int):
+            return self.__listweight[item]
+        else:
+            raise TypeError
 
+    def __iter__(self) -> Iterator[StringWeight]:
+        return iter(self.__listweight)
 
-x = MassiveWeight(('привет', 9.0), ("Пока", 2.0))
-x.genlist()
-x.sorter()
+    @property
+    def list(self) -> list[StringWeight]:
+        return self.__listweight
+
 
 
