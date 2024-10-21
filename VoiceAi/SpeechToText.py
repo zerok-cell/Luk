@@ -25,7 +25,7 @@ class SpeachToText:
             print(extractOne('раджаб', text)[1])
             return True
         else:
-            x = self.x.executeplugin(text)
+            self.x.executeplugin(text)
             return False
 
     def speachtotext(self):
@@ -56,6 +56,3 @@ class SpeachToText:
 
             #     if partial_text == "стоп":
             #         exit()
-
-
-

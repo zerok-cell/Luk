@@ -1,14 +1,14 @@
 import pathlib
 from functools import lru_cache
 from importlib import import_module
-from pathlib import Path
-import time
+
 
 class ScanDir:
     def __init__(self, target: str = None, type_file: str = None):
         self.__result_scan = None
         self.__path = target
-        self.__files_obj = iter([file for file in pathlib.Path(target).glob(f'*.{type_file}')])
+        self.__files_obj = iter(
+            [file for file in pathlib.Path(target).glob(f'*')])
         self.__path_plug: str = None
 
     def sys_path(self):
@@ -34,4 +34,3 @@ class ScanDir:
         for file in self.__files_obj:
             self.__result_scan.append(file.stem)
         return self.__result_scan
-

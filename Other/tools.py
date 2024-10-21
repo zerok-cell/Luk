@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from functools import lru_cache
+from typing import Callable
 
 
 @lru_cache(1)
@@ -53,3 +54,20 @@ class BaseFromCommand(ABC):
         if data >= self.sensity:
             return True
         return False
+
+
+def word_association_table(*args, func: Callable) -> dict[str, Callable]:
+    def addindict(element: str, call: Callable):
+        if isinstance(word, str):
+            result[element] = element
+
+    result: [str, Callable] = {}
+    if isinstance(args[0], list):
+        for word in args[0]:
+            addindict(word, func)
+    for word in args:
+        addindict(word, func)
+    return result
+
+
+
