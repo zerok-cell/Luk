@@ -27,4 +27,4 @@ DEBUG:
   MODE: "Debug"
 
 COMMAND:
-  sensity: 80
+  sensity: 60

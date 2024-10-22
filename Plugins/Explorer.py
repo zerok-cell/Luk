@@ -8,14 +8,13 @@ class Plugin(BaseFromCommand):
     def __init__(self, text: list[str]):
         self.text = text
         self.word = "проводник"
-        self.pycharm = Path(os.path.join(os.path.expanduser(r'~'), r"AppData\Local\Programs\PyCharm Community\bin"))
         super().__init__(text, self.word)
 
     def __call__(self):
         from subprocess import run
         from fuzzywuzzy import fuzz
         count_explorer = 0
-
+        print(11)
         for word in self.text:
             print(fuzz.ratio('проводник', word))
             if fuzz.ratio('проводник', word) > 70:

@@ -1,5 +1,4 @@
 Plugins.CloseApp
-Plugins.E
 Plugins.Explorer
 Plugins.MultiTools
 Plugins.WorkSpace

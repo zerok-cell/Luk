@@ -13,7 +13,7 @@ class LoadPlugin(ScanDir):
     @staticmethod
     def create_path(start: str, end: str) -> str:
         pth = os.path.join(start, end)
-        return pth.replace('/','.')
+        return pth.replace('/', '.')
 
     @lru_cache(1)
     @timedecorator

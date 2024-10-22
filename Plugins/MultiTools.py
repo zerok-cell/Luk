@@ -4,6 +4,8 @@ from fuzzywuzzy.process import extract
 
 from Other.tools import BaseFromCommand
 import os
+
+
 # TODO add plugin on folders systems
 
 class Plugin(BaseFromCommand):
@@ -35,6 +37,7 @@ class Plugin(BaseFromCommand):
 
     def openapp(self):
         pass
+
     def offpc(self):
         print('off')
 
@@ -48,6 +51,3 @@ class Plugin(BaseFromCommand):
     def word_check(self):
         from fuzzywuzzy.process import extractBests
         return extractBests(query=self.text, choices=self.word, limit=4)
-
-
-

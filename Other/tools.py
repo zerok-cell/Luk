@@ -40,6 +40,7 @@ class BaseFromCommand(ABC):
         self.text = text
         self.word = word
         self.sensity = getconfig()['COMMAND']['sensity']
+        print(self.sensity)
 
     @abstractmethod
     def __str__(self):
@@ -49,17 +50,18 @@ class BaseFromCommand(ABC):
     def __call__(self, *args, **kwargs):
         pass
 
-    def __new__(cls, *args, **kwargs):
-        __metadata: dict = {cls.__name__: __file__}
-        logging_message('info', f'Plugin Running {cls.__name__} from {__file__}. '
-                                f'Metadata: {__metadata}')
-        print(__metadata)
+    # def __new__(cls, *args, **kwargs):
+    #     __metadata: dict = {cls.__name__: __file__}
+    #     logging_message('info', f'Plugin Running {cls.__name__} from {__file__}. '
+    #                             f'Metadata: {__metadata}')
+    #     print(__metadata)
 
     def word_check(self):
-        print(self.text, self.__doc__)
         from fuzzywuzzy.process import extractOne
         data = extractOne(self.word, self.text)[1]
+        print(data)
         if data >= self.sensity:
+            self()
             return True
         return False
 

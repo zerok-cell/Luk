@@ -1,4 +1,3 @@
-
 from Other.tools import BaseFromCommand
 
 
