@@ -15,24 +15,18 @@ class LaunchPlugin:
         plugin = import_module(path)
         return plugin
 
-    def checkdander(self, word):
-        end = word[:2]
-        start = word[-2:]
-        if end and start == "__":
-            return True
-        return False
-
     def packagelevel(self, path_pakage: str, text, folder):
+        from Other.tools import checkdander
         from .ScaningDir import ScanDir
         pathplug = Path(path_pakage)
         print(pathplug)
         print(pathplug.stem.split('/')[-1])
-        if self.checkdander(pathplug.stem.split('/')[-1]):
+        if checkdander(pathplug.stem.split('/')[-1]):
             pass
         else:
             __file = ScanDir(path_pakage).scandir()
             for fl in __file:
-                if self.checkdander(fl):
+                if checkdander(fl):
                     continue
                 else:
                     print(f'Plugins.{folder}.{fl}')
@@ -66,7 +60,6 @@ class LaunchPlugin:
                 __wordchk = instanceplug.word_check()
                 if __wordchk:
                     instanceplug()
-
 
 # x = LaunchPlugin()
 # x.executeplugin(['проводник'])

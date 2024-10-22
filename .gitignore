@@ -2,3 +2,4 @@
 */__pycache__
 cr.py
 applog.log
+./VoiceAi/model/*

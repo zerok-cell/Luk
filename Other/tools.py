@@ -1,3 +1,4 @@
+import time
 from abc import ABC, abstractmethod
 from functools import lru_cache
 from typing import Callable
@@ -19,7 +20,7 @@ def getconfig() -> dict:
 def logging_message(level: str, text: str):
     from loguru import logger
     from os import environ
-    if environ['CodyDebug']:
+    if True:
         match level:
             case "info":
                 logger.info(text)
@@ -48,6 +49,12 @@ class BaseFromCommand(ABC):
     def __call__(self, *args, **kwargs):
         pass
 
+    def __new__(cls, *args, **kwargs):
+        __metadata: dict = {cls.__name__: __file__}
+        logging_message('info', f'Plugin Running {cls.__name__} from {__file__}. '
+                                f'Metadata: {__metadata}')
+        print(__metadata)
+
     def word_check(self):
         print(self.text, self.__doc__)
         from fuzzywuzzy.process import extractOne
@@ -55,6 +62,17 @@ class BaseFromCommand(ABC):
         if data >= self.sensity:
             return True
         return False
+
+
+class Test(BaseFromCommand):
+    def __str__(self):
+        pass
+
+    def __init__(self):
+        pass
+
+    def __call__(self, *args, **kwargs):
+        pass
 
 
 def word_association_table(*args, func: Callable) -> dict[str, Callable]:
@@ -71,4 +89,9 @@ def word_association_table(*args, func: Callable) -> dict[str, Callable]:
     return result
 
 
-
+def checkdander(word):
+    end = word[:2]
+    start = word[-2:]
+    if end and start == "__":
+        return True
+    return False

@@ -50,6 +50,4 @@ class Plugin(BaseFromCommand):
         return extractBests(query=self.text, choices=self.word, limit=4)
 
 
-s = Plugin('открой проводник и выключи пк').word_check()
 
-print(s)
