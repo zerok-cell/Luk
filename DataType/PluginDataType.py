@@ -1,8 +1,3 @@
-import importlib
-import os.path
-from pathlib import Path
-
-
 class ObjectPlugin:
     """Provides a Plugin data type for its loading, importing and unloading. Provides an iterator for traversing
     imported plugins"""
@@ -15,9 +10,10 @@ class ObjectPlugin:
     def import_plugin(self) -> None:
         """Function to import a plugin from the self.plugin attribute"""
         for __one_plugin in self.plugin:
+            import importlib
             result = importlib.import_module(f"Plugins.{__one_plugin[:-1]}")
-            obj = getattr(result, "Plugin")(['проводник'])
-            obj.word_check()
+            # obj = getattr(result, "Plugin")(['проводник'])
+            # obj.word_check()
             self.imported_plug.append(result)
 
     def read_path_plug(self) -> None:
@@ -47,7 +43,8 @@ class ObjectPlugin:
     def __len__(self):
         return len(self.imported_plug)
 
-
-x = ObjectPlugin()
-x.read_path_plug()
-x.import_plugin()
+# x = ObjectPlugin()
+# x.read_path_plug()
+# x.import_plugin()
+# for i in x:
+#     print(i)

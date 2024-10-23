@@ -96,3 +96,36 @@ def checkdander(word):
     if end and start == "__":
         return True
     return False
+
+
+def initialize_plugins():
+    from Command.LoadPlugin import LoadPlugin
+    from Decorators.Other import repeat
+
+    @repeat(3)
+    def combo_obp(loader: LoadPlugin):
+        from DataType.PluginDataType import ObjectPlugin as ObP
+        from Errors.EmptyFileError import EmptyFileError
+        obp = ObP()
+        try:
+            obp.read_path_plug()
+        except EmptyFileError:
+            loader.writepathplug()
+        obp.import_plugin()
+        return obp, loader
+
+    from Other.path import PLUGIN_LIST
+
+    with open(PLUGIN_LIST, 'r') as f:
+        loader = LoadPlugin()
+        if len(f.readlines()) == 0:
+
+            impread = combo_obp()
+            return impread
+        else:
+            return None
+
+
+x = initialize_plugins()
+for i in x:
+    print(i)
