@@ -1,16 +1,12 @@
-from pathlib import Path
-
-from fuzzywuzzy.process import extract
 
 from Other.tools import BaseFromCommand
-import os
+from Decorators.Plugin import serializer_combo_class
 
 
-# TODO add plugin on folders systems
-
+@serializer_combo_class
 class Plugin(BaseFromCommand):
-    def __init__(self, text: list[str]):
-        self.text = text
+    def __init__(self, text: str):
+        self.text: str = text
         self.word = [
             'выключить',
             'открыть проводник',
@@ -18,9 +14,6 @@ class Plugin(BaseFromCommand):
             'открой'
 
         ]
-
-        def p():
-            pass
 
         from Other.tools import word_association_table
         self.off = word_association_table(['выключить',
@@ -50,4 +43,5 @@ class Plugin(BaseFromCommand):
 
     def word_check(self):
         from fuzzywuzzy.process import extractBests
+
         return extractBests(query=self.text, choices=self.word, limit=4)

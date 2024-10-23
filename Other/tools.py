@@ -1,4 +1,3 @@
-import time
 from abc import ABC, abstractmethod
 from functools import lru_cache
 from typing import Callable
@@ -18,9 +17,22 @@ def getconfig() -> dict:
 
 
 def logging_message(level: str, text: str):
+    global __flags
     from loguru import logger
     from os import environ
-    if True:
+    recursion_prevention_flag = 0
+    try:
+        __flags = environ['CodyDebug'] == 'On'
+    except KeyError:
+        getconfig()
+        if recursion_prevention_flag == 3:
+            from Errors.LoguruErrors import FailedToCreateVariable
+            raise FailedToCreateVariable
+        else:
+            recursion_prevention_flag += 1
+            logging_message(level, text)
+
+    if __flags:
         match level:
             case "info":
                 logger.info(text)
@@ -40,7 +52,6 @@ class BaseFromCommand(ABC):
         self.text = text
         self.word = word
         self.sensity = getconfig()['COMMAND']['sensity']
-        print(self.sensity)
 
     @abstractmethod
     def __str__(self):
@@ -50,31 +61,19 @@ class BaseFromCommand(ABC):
     def __call__(self, *args, **kwargs):
         pass
 
-    # def __new__(cls, *args, **kwargs):
-    #     __metadata: dict = {cls.__name__: __file__}
-    #     logging_message('info', f'Plugin Running {cls.__name__} from {__file__}. '
-    #                             f'Metadata: {__metadata}')
-    #     print(__metadata)
+    def __new__(cls, *args, **kwargs):
+        __metadata: dict = {cls.__name__: __file__}
+        logging_message('info', f'Plugin Running {cls.__name__} from {__file__}. '
+                                f'Metadata: {__metadata}')
+        return super().__new__(cls)
 
     def word_check(self):
         from fuzzywuzzy.process import extractOne
         data = extractOne(self.word, self.text)[1]
-        print(data)
         if data >= self.sensity:
             self()
             return True
         return False
-
-
-class Test(BaseFromCommand):
-    def __str__(self):
-        pass
-
-    def __init__(self):
-        pass
-
-    def __call__(self, *args, **kwargs):
-        pass
 
 
 def word_association_table(*args, func: Callable) -> dict[str, Callable]:

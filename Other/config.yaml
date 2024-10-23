@@ -23,7 +23,7 @@ Theard:
   FromSpeach: 1
 
 DEBUG:
-  STATUS: "On"
+  STATUS: "Off"
   MODE: "Debug"
 
 COMMAND:

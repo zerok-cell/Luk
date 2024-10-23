@@ -14,7 +14,6 @@ class Plugin(BaseFromCommand):
         from subprocess import run
         from fuzzywuzzy import fuzz
         count_explorer = 0
-        print(11)
         for word in self.text:
             print(fuzz.ratio('проводник', word))
             if fuzz.ratio('проводник', word) > 70:

@@ -1,4 +1,4 @@
-Plugins.CloseApp
-Plugins.Explorer
-Plugins.MultiTools
-Plugins.WorkSpace
+CloseApp
+Explorer
+MultiTools
+WorkSpace

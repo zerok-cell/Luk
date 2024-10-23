@@ -29,7 +29,9 @@ class LoadPlugin(ScanDir):
                         continue
                     else:
 
-                        file.write(f'Plugins.{path}\n')
+                        file.write(f'{path}\n')
+                        from Other.tools import logging_message
+                        logging_message('info', f'Plugin {path} write')
                 file.close()
         from Other.tools import logging_message
         logging_message('info', 'A registry of plugin paths has been created see')

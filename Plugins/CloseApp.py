@@ -21,7 +21,6 @@ class Plugin(BaseFromCommand):
         self.controller.release(__f4)
 
     def __call__(self):
-        print('Close')
         count_explorer = 0
         from fuzzywuzzy import fuzz
 

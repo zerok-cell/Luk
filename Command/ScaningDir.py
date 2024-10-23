@@ -4,6 +4,13 @@ from importlib import import_module
 
 
 class ScanDir:
+
+    """The class provides functionality for scanning folders
+    Arguments:
+    target: Path to the folder we are scanning
+    type_files: The file extension that we will search for, if not passed it will search for all files
+    """
+
     def __init__(self, target: str = None, type_file: str = None):
         self.__result_scan = None
         self.__path = target
@@ -21,7 +28,6 @@ class ScanDir:
     def __next__(self) -> str:
         if self.__path_plug is None:
             self.sys_path()
-
         try:
             self.__path_plug = next(self.__files_obj)
             return str(self.__path_plug)
@@ -30,6 +36,7 @@ class ScanDir:
 
     @lru_cache
     def scandir(self) -> list[str]:
+        """EFFICIENT FOLDER SCANNER WITH SUBSEQUENT CACHING"""
         self.__result_scan: list[pathlib.WindowsPath] = []
         for file in self.__files_obj:
             self.__result_scan.append(file.stem)
